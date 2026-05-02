@@ -1,0 +1,5 @@
+# Protect GitHub workflows
+.github/workflows/ @thararaoganji
+
+# Protect Flyway migrations
+src/main/resources/db/migration/ @thararaoganji
