@@ -1,0 +1,45 @@
+### Java / Spring Boot ###
+*.class
+*.jar
+*.war
+*.ear
+/build/
+.gradle/
+.apt_generated/
+.settings/
+.classpath
+.project
+.factorypath
+
+### Flyway ###
+# If you use the Flyway CLI locally, ignore the configuration file
+flyway.conf
+# Ignore local-only SQL scripts (e.g., for seeding test data)
+src/main/resources/db/migration/local/
+# If you generate migration checksums or logs
+.flyway.check
+
+### Environment & Secrets (CRITICAL) ###
+# Ignore local overrides for Flyway/DB credentials
+application-local.properties
+application-local.yml
+.env
+.env.local
+
+### IDEs ###
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+.history/
+bin/
+out/
+
+### OS Specific ###
+.DS_Store
+Thumbs.db
+
+### Gradle Wrapper ###
+# We usually keep the wrapper, but ignore user-specific settings
+.gradle-home/

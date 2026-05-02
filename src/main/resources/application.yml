@@ -1,0 +1,56 @@
+server:
+  servlet:
+    context-path: /expenses-portal
+  port:
+    8082
+spring:
+  application:
+    name: expenses-portal
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5434/expense_db}
+    username: ${SPRING_DATASOURCE_USERNAME:expense_user}
+    password: ${SPRING_DATASOURCE_PASSWORD:expense_pass}
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: false
+  flyway:
+    enabled: true
+  liquibase:
+    enabled: false
+
+jwt:
+  secret: ${JWT_SECRET:mysecretkeymysecretkeymysecretkey}
+  expiration: 3600000
+
+storage:
+  mode: ${STORAGE_MODE:local}  # Options: 'local' or 's3'
+  local:
+    upload-dir: ${LOCAL_UPLOAD_DIR:./uploads/receipts}
+
+aws:
+  s3:
+    bucket.name: ${AWS_S3_BUCKET_NAME:s3-expense-divya}
+  region: us-east-1
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+logging:
+  level:
+    root: INFO
+    org.springframework.security: WARN
+    org.springframework.web: WARN
+    org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping: INFO
+    com.expense.project: INFO
+    com.expense.project.config.com.expense.project.config.RequestResponseLoggingFilter: WARN
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%thread] %logger{40} - %msg%n"
+  file:
+    name: logs/expense-app.log
+    max-size: 10MB
+    max-history: 30
+    total-size-cap: 1GB
