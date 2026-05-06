@@ -50,6 +50,8 @@ public class WebSecurityConfig {
         http
                 .securityMatcher("/actuator/**")
                 .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
+                // CSRF is disabled for this REST API because it uses token-based authentication (JWT)
+                // and does not rely on session cookies, which are typically targeted by CSRF attacks.
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
         return http.build();
@@ -89,6 +91,8 @@ public class WebSecurityConfig {
     @Order(1)
     public SecurityFilterChain appSecurity(HttpSecurity http) throws Exception {
         http
+                // CSRF is disabled for this REST API because it uses token-based authentication (JWT)
+                // and does not rely on session cookies, which are typically targeted by CSRF attacks.
                 .csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
