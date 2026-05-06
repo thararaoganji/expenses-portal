@@ -32,6 +32,8 @@ public class ManagerController {
      */
     @GetMapping("/approval-queue")
     public ResponseEntity<List<Expense>> getApprovalQueue() {
+        System.out.println("/approval-queue");
+        System.out.println("Fetching approval queue...");
         List<Expense> expenses = expenseService.getExpensesByStatus(ApprovalStatus.MANAGER_REVIEW);
         return ResponseEntity.ok(expenses);
     }
