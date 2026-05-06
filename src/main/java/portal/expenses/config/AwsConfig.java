@@ -14,7 +14,7 @@ public class AwsConfig {
     public S3Client s3Client(@Value("${aws.region}") String awsRegion) {
         return S3Client.builder()
                 .region(Region.of(awsRegion))
-                .credentialsProvider(DefaultCredentialsProvider.create())
+                .credentialsProvider(DefaultCredentialsProvider.builder().build())
                 .build();
     }
 }
