@@ -50,7 +50,7 @@ public class WebSecurityConfig {
         http
                 .securityMatcher("/actuator/**")
                 .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
-                .csrf(csrf -> csrf.disable())
+                .csrf(csrf -> csrf.disable()) // CSRF is disabled as the application is a stateless API using JWT for authentication.
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
         return http.build();
     }
@@ -89,7 +89,7 @@ public class WebSecurityConfig {
     @Order(1)
     public SecurityFilterChain appSecurity(HttpSecurity http) throws Exception {
         http
-                .csrf(csrf -> csrf.disable())
+                .csrf(csrf -> csrf.disable()) // CSRF is disabled as the application is a stateless API using JWT for authentication.
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .exceptionHandling(exception -> exception.authenticationEntryPoint(customAuthenticationEntryPoint))
