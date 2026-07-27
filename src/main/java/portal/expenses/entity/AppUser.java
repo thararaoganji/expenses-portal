@@ -31,7 +31,7 @@ public class AppUser implements UserDetails {
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "role_id")
     )
-    private Set<Role> roles = new HashSet<>();
+    private transient Set<Role> roles = new HashSet<>();
 
     // Getters and Setters...
 
