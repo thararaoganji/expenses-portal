@@ -12,7 +12,9 @@ import portal.expenses.repository.ExpenseRepository;
 import portal.expenses.repository.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -32,9 +34,15 @@ import java.util.UUID;
 public class ExpenseService {
 
     private static final Logger logger = LoggerFactory.getLogger(ExpenseService.class);
+    private static final String USER_NOT_FOUND_PREFIX = "User not found: ";
+    private static final String EXPENSE_NOT_FOUND_PREFIX = "Expense not found with ID: ";
 
     @Value("${storage.mode}")
     private String storageMode;
+
+    @Autowired
+    @Lazy
+    private ExpenseService self;
 
     private final ExpenseRepository expenseRepository;
     private final UserRepository userRepository;
@@ -59,7 +67,7 @@ public class ExpenseService {
                                  String username, ExpenseCategory category, LocalDate expenseDate,
                                  boolean draft) throws IOException {
         AppUser user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
+                .orElseThrow(() -> new UsernameNotFoundException(USER_NOT_FOUND_PREFIX + username));
 
         // Upload receipt based on storage mode
         String fileKey = null;
@@ -132,7 +140,7 @@ public class ExpenseService {
     @Transactional
     public Expense createExpense(String description, BigDecimal amount, MultipartFile receipt,
                                  String username, ExpenseCategory category, LocalDate expenseDate) throws IOException {
-        return createExpense(description, amount, receipt, username, category, expenseDate, false);
+        return self.createExpense(description, amount, receipt, username, category, expenseDate, false);
     }
 
     public List<Expense> getExpensesForUser(Long userId) {
@@ -141,12 +149,12 @@ public class ExpenseService {
 
     public Expense getExpenseById(Long expenseId) {
         return expenseRepository.findById(expenseId)
-                .orElseThrow(() -> new RuntimeException("Expense not found with ID: " + expenseId));
+                .orElseThrow(() -> new RuntimeException(EXPENSE_NOT_FOUND_PREFIX + expenseId));
     }
 
     public List<Expense> getExpensesForCurrentUser(String username) {
         AppUser user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("User not found: " + username));
+                .orElseThrow(() -> new RuntimeException(USER_NOT_FOUND_PREFIX + username));
         return expenseRepository.findByUserId(user.getId());
     }
 
@@ -156,7 +164,7 @@ public class ExpenseService {
     @Transactional
     public Expense submitExpense(Long expenseId, String username) {
         Expense expense = expenseRepository.findById(expenseId)
-                .orElseThrow(() -> new RuntimeException("Expense not found with ID: " + expenseId));
+                .orElseThrow(() -> new RuntimeException(EXPENSE_NOT_FOUND_PREFIX + expenseId));
 
         // Verify ownership
         if (!expense.getUser().getUsername().equals(username)) {
@@ -182,7 +190,7 @@ public class ExpenseService {
 
         // Create audit entry for submission
         AppUser user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("User not found: " + username));
+                .orElseThrow(() -> new RuntimeException(USER_NOT_FOUND_PREFIX + username));
         createAuditEntryWithStatus(expense, user, "SUBMITTED",
             oldStatus != null ? oldStatus.toString() : null,
             expense.getApprovalStatus().toString(),
@@ -202,7 +210,7 @@ public class ExpenseService {
                                  MultipartFile receipt, String username, ExpenseCategory category,
                                  LocalDate expenseDate) throws IOException {
         Expense expense = expenseRepository.findById(expenseId)
-                .orElseThrow(() -> new RuntimeException("Expense not found with ID: " + expenseId));
+                .orElseThrow(() -> new RuntimeException(EXPENSE_NOT_FOUND_PREFIX + expenseId));
 
         // Verify ownership
         if (!expense.getUser().getUsername().equals(username)) {
@@ -248,7 +256,7 @@ public class ExpenseService {
 
         // Create audit entry for update
         AppUser user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("User not found: " + username));
+                .orElseThrow(() -> new RuntimeException(USER_NOT_FOUND_PREFIX + username));
         createAuditEntry(expense, user, "UPDATED",
             String.format("Expense updated: amount=%s, category=%s", amount, category));
 
@@ -268,7 +276,7 @@ public class ExpenseService {
      */
     public List<Expense> getExpensesForUserWithDateRange(String username, String startDateStr, String endDateStr) {
         AppUser user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
+                .orElseThrow(() -> new UsernameNotFoundException(USER_NOT_FOUND_PREFIX + username));
 
         if (startDateStr != null && endDateStr != null) {
             LocalDate startDate = LocalDate.parse(startDateStr);
@@ -294,7 +302,7 @@ public class ExpenseService {
     @Transactional
     public Expense markAsReimbursed(Long expenseId) {
         Expense expense = expenseRepository.findById(expenseId)
-                .orElseThrow(() -> new RuntimeException("Expense not found with ID: " + expenseId));
+                .orElseThrow(() -> new RuntimeException(EXPENSE_NOT_FOUND_PREFIX + expenseId));
 
         if (expense.getApprovalStatus() != ApprovalStatus.APPROVED) {
             throw new IllegalStateException(
@@ -348,7 +356,7 @@ public class ExpenseService {
      */
     public PageResponse<Expense> getExpensesWithFilters(String username, ExpenseFilterRequest filter) {
         AppUser user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
+                .orElseThrow(() -> new UsernameNotFoundException(USER_NOT_FOUND_PREFIX + username));
 
         // Create sort
         Sort sort = Sort.by(

@@ -25,6 +25,7 @@ import java.util.stream.Collectors;
 public class AuthController {
 
     private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
+    private static final String VALID_KEY = "valid";
 
     private final AuthenticationManager authenticationManager;
     private final JwtUtil jwtUtil;
@@ -72,7 +73,7 @@ public class AuthController {
 
         try {
             if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-                response.put("valid", false);
+                response.put(VALID_KEY, false);
                 response.put("error", "Missing or invalid Authorization header");
                 logger.warn("Token validation failed: Missing or invalid header");
                 return ResponseEntity.badRequest().body(response);
@@ -88,7 +89,7 @@ public class AuthController {
             UserDetails userDetails = userDetailsService.loadUserByUsername(username);
             boolean isValid = jwtUtil.validateToken(token, userDetails);
 
-            response.put("valid", isValid);
+            response.put(VALID_KEY, isValid);
             response.put("roles", userDetails.getAuthorities().stream()
                     .map(a -> a.getAuthority())
                     .collect(Collectors.toList()));
@@ -101,7 +102,7 @@ public class AuthController {
 
             return ResponseEntity.ok(response);
         } catch (Exception e) {
-            response.put("valid", false);
+            response.put(VALID_KEY, false);
             response.put("error", e.getMessage());
             logger.error("Token validation error: {}", e.getMessage(), e);
             return ResponseEntity.badRequest().body(response);
