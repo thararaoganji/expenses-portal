@@ -321,7 +321,7 @@ class ExpenseServiceTest {
         entry2.setId(2L);
         entry2.setAction("SUBMITTED");
 
-        List<AuditEntry> @SuppressWarnings("unused") expectedAudit = Arrays.asList(entry1, entry2);
+        List<AuditEntry> expectedAudit = Arrays.asList(entry1, entry2);
         when(auditEntryRepository.findByExpenseIdOrderByCreatedAtAsc(1L))
             .thenReturn(expectedAudit);
 
