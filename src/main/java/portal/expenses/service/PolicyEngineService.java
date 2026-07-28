@@ -90,10 +90,7 @@ public class PolicyEngineService {
      */
     private boolean evaluateRule(PolicyRule rule, Expense expense) {
         switch (rule.getRuleType()) {
-            case AMOUNT_THRESHOLD:
-            case AUTO_APPROVE:
-            case MANAGER_APPROVAL:
-            case FINANCE_APPROVAL:
+            case AMOUNT_THRESHOLD, AUTO_APPROVE, MANAGER_APPROVAL, FINANCE_APPROVAL:
                 return evaluateAmountThreshold(rule, expense);
             case CATEGORY_RULE:
                 return evaluateCategoryRule(rule, expense);

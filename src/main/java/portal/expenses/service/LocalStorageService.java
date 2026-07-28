@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.NoSuchElementException;
 
 @Service
 public class LocalStorageService {
@@ -51,12 +52,11 @@ public class LocalStorageService {
         try {
             Path filePath = Paths.get(uploadDir).resolve(objectKey);
             if (!Files.exists(filePath)) {
-                throw new RuntimeException("File not found: " + objectKey);
+                throw new NoSuchElementException("File not found: " + objectKey);
             }
             return Files.readAllBytes(filePath);
         } catch (IOException e) {
-            logger.error("Error downloading file from local storage: {}", objectKey, e);
-            throw new RuntimeException("Failed to download file: " + objectKey, e);
+            throw new IllegalStateException("Failed to download file: " + objectKey, e);
         }
     }
 
@@ -71,8 +71,7 @@ public class LocalStorageService {
                 logger.info("File deleted from local storage: {}", filePath.toAbsolutePath());
             }
         } catch (IOException e) {
-            logger.error("Error deleting file from local storage: {}", objectKey, e);
-            throw new RuntimeException("Failed to delete file: " + objectKey, e);
+            throw new IllegalStateException("Failed to delete file: " + objectKey, e);
         }
     }
 }
