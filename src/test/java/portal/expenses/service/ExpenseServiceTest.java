@@ -156,17 +156,21 @@ class ExpenseServiceTest {
         // Arrange
         when(userRepository.findByUsername("unknown.user")).thenReturn(Optional.empty());
 
+        // Extract parameters outside of the lambda
+        BigDecimal amount = new BigDecimal("100.00");
+        LocalDate date = LocalDate.now();
+
         // Act & Assert
-        assertThrows(UsernameNotFoundException.class, () -> {
+        assertThrows(UsernameNotFoundException.class, () ->
             expenseService.createExpense(
                 "Test",
-                new BigDecimal("100.00"),
+                amount,
                 null,
                 "unknown.user",
                 ExpenseCategory.OTHER,
-                LocalDate.now()
-            );
-        });
+                date
+            )
+        );
 
         verify(expenseRepository, never()).save(any());
     }
@@ -202,9 +206,9 @@ class ExpenseServiceTest {
         when(expenseRepository.findById(1L)).thenReturn(Optional.of(testExpense));
 
         // Act & Assert
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
-            expenseService.submitExpense(1L, "different.user");
-        });
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> 
+            expenseService.submitExpense(1L, "different.user")
+        );
 
         assertTrue(exception.getMessage().contains("not authorized"));
         verify(expenseRepository, never()).save(any());
@@ -250,9 +254,9 @@ class ExpenseServiceTest {
         when(expenseRepository.findById(999L)).thenReturn(Optional.empty());
 
         // Act & Assert
-        assertThrows(RuntimeException.class, () -> {
-            expenseService.getExpenseById(999L);
-        });
+        assertThrows(RuntimeException.class, () -> 
+            expenseService.getExpenseById(999L)
+        );
     }
 
     @Test
@@ -282,9 +286,9 @@ class ExpenseServiceTest {
         when(expenseRepository.findById(1L)).thenReturn(Optional.of(testExpense));
 
         // Act & Assert
-        IllegalStateException exception = assertThrows(IllegalStateException.class, () -> {
-            expenseService.markAsReimbursed(1L);
-        });
+        IllegalStateException exception = assertThrows(IllegalStateException.class, () -> 
+            expenseService.markAsReimbursed(1L)
+        );
 
         assertTrue(exception.getMessage().contains("Only approved expenses"));
         verify(expenseRepository, never()).save(any());

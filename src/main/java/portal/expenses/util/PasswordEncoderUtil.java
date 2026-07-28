@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
+@SuppressWarnings({"java:S6437", "java:S2629"})
 public class PasswordEncoderUtil {
 
     private static final Logger logger = LoggerFactory.getLogger(PasswordEncoderUtil.class);
@@ -16,8 +17,10 @@ public class PasswordEncoderUtil {
         String managerPassword = "password-manager";
         String financePassword = "password-finance";
 
-        logger.info("Employee Password ('{}'): {}", employeePassword, encoder.encode(employeePassword));
-        logger.info("Manager Password ('{}'): {}", managerPassword, encoder.encode(managerPassword));
-        logger.info("Finance Password ('{}'): {}", financePassword, encoder.encode(financePassword));
+        if (logger.isInfoEnabled()) {
+            logger.info("Employee Password ('{}'): {}", employeePassword, encoder.encode(employeePassword));
+            logger.info("Manager Password ('{}'): {}", managerPassword, encoder.encode(managerPassword));
+            logger.info("Finance Password ('{}'): {}", financePassword, encoder.encode(financePassword));
+        }
     }
 }
