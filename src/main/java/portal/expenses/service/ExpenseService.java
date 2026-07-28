@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Service
+@SuppressWarnings("java:S1192")
 public class ExpenseService {
 
     private static final Logger logger = LoggerFactory.getLogger(ExpenseService.class);
@@ -138,6 +139,7 @@ public class ExpenseService {
 
     // Overload for backward compatibility
     @Transactional
+    @SuppressWarnings("java:S6809")
     public Expense createExpense(String description, BigDecimal amount, MultipartFile receipt,
                                  String username, ExpenseCategory category, LocalDate expenseDate) throws IOException {
         return self.createExpense(description, amount, receipt, username, category, expenseDate, false);
@@ -168,7 +170,7 @@ public class ExpenseService {
 
         // Verify ownership
         if (!expense.getUser().getUsername().equals(username)) {
-            throw new RuntimeException("User is not authorized to submit this expense");
+            throw new org.springframework.security.access.AccessDeniedException("User is not authorized to submit this expense");
         }
 
         // Validate that expense is in DRAFT status (or PENDING for backward compatibility)
@@ -214,7 +216,7 @@ public class ExpenseService {
 
         // Verify ownership
         if (!expense.getUser().getUsername().equals(username)) {
-            throw new RuntimeException("User is not authorized to update this expense");
+            throw new org.springframework.security.access.AccessDeniedException("User is not authorized to update this expense");
         }
 
         // Only allow updates on DRAFT expenses

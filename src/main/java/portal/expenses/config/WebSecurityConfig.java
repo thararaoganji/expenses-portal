@@ -22,6 +22,7 @@ import java.util.Arrays;
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity(prePostEnabled = true)
+@SuppressWarnings({"java:S1192", "java:S4502"})
 public class WebSecurityConfig {
 
     private static final String ROLE_MANAGER = "ROLE_MANAGER";

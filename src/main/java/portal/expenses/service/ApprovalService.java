@@ -132,9 +132,7 @@ public class ApprovalService {
                         "Invalid transition from FINANCE_REVIEW to " + newStatus);
                 }
                 break;
-            case AUTO_APPROVED:
-            case APPROVED:
-            case REJECTED:
+            case AUTO_APPROVED, APPROVED, REJECTED:
                 throw new IllegalStateException(
                     "Cannot change status of expense in " + currentStatus + " state");
             default:
