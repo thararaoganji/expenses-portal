@@ -36,6 +36,7 @@ public interface ExpenseRepository extends JpaRepository<Expense, Long>, JpaSpec
            "(:startDate IS NULL OR e.expenseDate >= :startDate) AND " +
            "(:endDate IS NULL OR e.expenseDate <= :endDate) AND " +
            "(:hasReceipt IS NULL OR e.hasReceipt = :hasReceipt)")
+    @SuppressWarnings("java:S107") // Spring Data JPA requires binding each parameter individually for query method
     Page<Expense> findByFilters(
             @Param("userId") Long userId,
             @Param("status") ApprovalStatus status,

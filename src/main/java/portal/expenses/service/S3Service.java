@@ -9,8 +9,6 @@ import software.amazon.awssdk.services.s3.model.GetObjectRequest;
 import software.amazon.awssdk.services.s3.model.GetObjectResponse;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
-import java.io.IOException;
-
 @Service
 public class S3Service {
 
@@ -23,7 +21,7 @@ public class S3Service {
         this.s3Client = s3Client;
     }
 
-    public void uploadFile(String key, byte[] fileBytes) throws IOException {
+    public void uploadFile(String key, byte[] fileBytes) {
         PutObjectRequest putObjectRequest = PutObjectRequest.builder()
                 .bucket(bucketName)
                 .key(key)

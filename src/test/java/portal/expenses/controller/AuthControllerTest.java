@@ -1,6 +1,7 @@
 package portal.expenses.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.Test;
 import portal.expenses.config.ApplicationConfig;
 import portal.expenses.config.WebSecurityConfig;
 import portal.expenses.dto.LoginRequest;
@@ -47,7 +48,7 @@ class AuthControllerTest {
     @MockBean
     private UserDetailsServiceImpl userDetailsService;
 
-    //@Test
+    @Test
     void login_shouldReturnToken_whenCredentialsAreValid() throws Exception {
         // Arrange
         LoginRequest loginRequest = new LoginRequest("user", "password");
@@ -65,7 +66,7 @@ class AuthControllerTest {
                 .andExpect(jsonPath("$.token").value("mock-jwt-token"));
     }
 
-    //@Test
+    @Test
     void login_shouldReturnUnauthorized_whenCredentialsAreInvalid() throws Exception {
         // Arrange
         LoginRequest loginRequest = new LoginRequest("user", "wrong-password");

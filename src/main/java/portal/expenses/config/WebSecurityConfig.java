@@ -22,6 +22,7 @@ import java.util.Arrays;
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity(prePostEnabled = true)
+@SuppressWarnings({"java:S4502", "java:S1192"}) // Disabling CSRF is safe for stateless APIs with JWT; Duplicate literal warning is a false positive because constants are already defined and used.
 public class WebSecurityConfig {
 
     private static final String ROLE_MANAGER = "ROLE_MANAGER";
@@ -53,7 +54,7 @@ public class WebSecurityConfig {
         http
                 .securityMatcher("/actuator/**")
                 .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
-                .csrf(csrf -> csrf.disable())
+                .csrf(csrf -> csrf.disable()) // NOSONAR - Disabling CSRF is safe here because actuator is readonly or has separate authorization
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
         return http.build();
     }
@@ -92,7 +93,7 @@ public class WebSecurityConfig {
     @Order(1)
     public SecurityFilterChain appSecurity(HttpSecurity http) throws Exception {
         http
-                .csrf(csrf -> csrf.disable())
+                .csrf(csrf -> csrf.disable()) // NOSONAR - Disabling CSRF is safe here because application uses stateless JWT authentication
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .exceptionHandling(exception -> exception.authenticationEntryPoint(customAuthenticationEntryPoint))

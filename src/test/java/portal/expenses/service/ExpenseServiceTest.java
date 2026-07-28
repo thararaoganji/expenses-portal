@@ -1,5 +1,10 @@
 package portal.expenses.service;
 
+import portal.expenses.entity.AuditEntry;
+import portal.expenses.entity.Expense;
+import portal.expenses.entity.ExpenseCategory;
+import portal.expenses.entity.ApprovalStatus;
+import portal.expenses.entity.AppUser;
 import portal.expenses.repository.AuditEntryRepository;
 import portal.expenses.repository.ExpenseRepository;
 import portal.expenses.repository.UserRepository;
@@ -12,7 +17,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import portal.expenses.entity.*;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -156,15 +160,18 @@ class ExpenseServiceTest {
         // Arrange
         when(userRepository.findByUsername("unknown.user")).thenReturn(Optional.empty());
 
+        BigDecimal amount = new BigDecimal("100.00");
+        LocalDate date = LocalDate.now();
+
         // Act & Assert
         assertThrows(UsernameNotFoundException.class, () -> {
             expenseService.createExpense(
                 "Test",
-                new BigDecimal("100.00"),
+                amount,
                 null,
                 "unknown.user",
                 ExpenseCategory.OTHER,
-                LocalDate.now()
+                date
             );
         });
 

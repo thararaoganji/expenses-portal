@@ -6,6 +6,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.io.FileNotFoundException;
+import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -51,12 +53,11 @@ public class LocalStorageService {
         try {
             Path filePath = Paths.get(uploadDir).resolve(objectKey);
             if (!Files.exists(filePath)) {
-                throw new RuntimeException("File not found: " + objectKey);
+                throw new FileNotFoundException("File not found: " + objectKey);
             }
             return Files.readAllBytes(filePath);
         } catch (IOException e) {
-            logger.error("Error downloading file from local storage: {}", objectKey, e);
-            throw new RuntimeException("Failed to download file: " + objectKey, e);
+            throw new UncheckedIOException("Failed to download file: " + objectKey, e);
         }
     }
 
@@ -71,8 +72,7 @@ public class LocalStorageService {
                 logger.info("File deleted from local storage: {}", filePath.toAbsolutePath());
             }
         } catch (IOException e) {
-            logger.error("Error deleting file from local storage: {}", objectKey, e);
-            throw new RuntimeException("Failed to delete file: " + objectKey, e);
+            throw new UncheckedIOException("Failed to delete file: " + objectKey, e);
         }
     }
 }
