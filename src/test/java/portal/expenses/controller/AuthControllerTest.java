@@ -5,6 +5,7 @@ import portal.expenses.config.ApplicationConfig;
 import portal.expenses.config.WebSecurityConfig;
 import portal.expenses.dto.LoginRequest;
 import portal.expenses.service.UserDetailsServiceImpl;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -15,6 +16,7 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.User;
 import portal.expenses.util.JwtUtil;
+import portal.expenses.repository.UserRepository;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -42,20 +44,28 @@ class AuthControllerTest {
     @MockBean
     private JwtUtil jwtUtil;
 
+    @MockBean
+    private UserRepository userRepository;
+
     // We must mock UserDetailsServiceImpl because JwtAuthFilter (a web component)
     // depends on it, and it's not loaded in a @WebMvcTest slice.
     @MockBean
     private UserDetailsServiceImpl userDetailsService;
 
-    //@Test
+    @Test
     void login_shouldReturnToken_whenCredentialsAreValid() throws Exception {
         // Arrange
         LoginRequest loginRequest = new LoginRequest("user", "password");
         UserDetails userDetails = new User("user", "password", new ArrayList<>());
         UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
 
+        portal.expenses.entity.AppUser appUser = new portal.expenses.entity.AppUser();
+        appUser.setUsername("user");
+        appUser.setName("User");
+
         when(authenticationManager.authenticate(any())).thenReturn(authentication);
         when(jwtUtil.generateToken(any(UserDetails.class))).thenReturn("mock-jwt-token");
+        when(userRepository.findByUsername("user")).thenReturn(java.util.Optional.of(appUser));
 
         // Act & Assert
         mockMvc.perform(post("/auth/login")
@@ -65,7 +75,7 @@ class AuthControllerTest {
                 .andExpect(jsonPath("$.token").value("mock-jwt-token"));
     }
 
-    //@Test
+    @Test
     void login_shouldReturnUnauthorized_whenCredentialsAreInvalid() throws Exception {
         // Arrange
         LoginRequest loginRequest = new LoginRequest("user", "wrong-password");
