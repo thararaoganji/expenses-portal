@@ -8,16 +8,15 @@ public class PasswordEncoderUtil {
 
     private static final Logger logger = LoggerFactory.getLogger(PasswordEncoderUtil.class);
 
+    private PasswordEncoderUtil() {}
+
     public static void main(String[] args) {
         BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
 
-        // --- Generate hashes for your initial users ---
-        String employeePassword = "password-employee";
-        String managerPassword = "password-manager";
-        String financePassword = "password-finance";
-
-        logger.info("Employee Password ('{}'): {}", employeePassword, encoder.encode(employeePassword));
-        logger.info("Manager Password ('{}'): {}", managerPassword, encoder.encode(managerPassword));
-        logger.info("Finance Password ('{}'): {}", financePassword, encoder.encode(financePassword));
+        if (args.length >= 3 && logger.isInfoEnabled()) {
+            logger.info("Employee Hash: {}", encoder.encode(args[0]));
+            logger.info("Manager Hash: {}", encoder.encode(args[1]));
+            logger.info("Finance Hash: {}", encoder.encode(args[2]));
+        }
     }
 }
