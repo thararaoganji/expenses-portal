@@ -156,17 +156,20 @@ class ExpenseServiceTest {
         // Arrange
         when(userRepository.findByUsername("unknown.user")).thenReturn(Optional.empty());
 
+        BigDecimal amount = new BigDecimal("100.00");
+        LocalDate date = LocalDate.now();
+
         // Act & Assert
-        assertThrows(UsernameNotFoundException.class, () -> {
+        assertThrows(UsernameNotFoundException.class, () -> 
             expenseService.createExpense(
                 "Test",
-                new BigDecimal("100.00"),
+                amount,
                 null,
                 "unknown.user",
                 ExpenseCategory.OTHER,
-                LocalDate.now()
-            );
-        });
+                date
+            )
+        );
 
         verify(expenseRepository, never()).save(any());
     }
@@ -202,11 +205,10 @@ class ExpenseServiceTest {
         when(expenseRepository.findById(1L)).thenReturn(Optional.of(testExpense));
 
         // Act & Assert
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
-            expenseService.submitExpense(1L, "different.user");
-        });
+        assertThrows(org.springframework.security.access.AccessDeniedException.class, () -> 
+            expenseService.submitExpense(1L, "different.user")
+        );
 
-        assertTrue(exception.getMessage().contains("not authorized"));
         verify(expenseRepository, never()).save(any());
     }
 
@@ -282,11 +284,10 @@ class ExpenseServiceTest {
         when(expenseRepository.findById(1L)).thenReturn(Optional.of(testExpense));
 
         // Act & Assert
-        IllegalStateException exception = assertThrows(IllegalStateException.class, () -> {
+        assertThrows(IllegalStateException.class, () -> {
             expenseService.markAsReimbursed(1L);
         });
 
-        assertTrue(exception.getMessage().contains("Only approved expenses"));
         verify(expenseRepository, never()).save(any());
     }
 

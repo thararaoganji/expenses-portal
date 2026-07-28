@@ -105,7 +105,6 @@ public class FinanceController {
      */
     @GetMapping("/approved")
     public ResponseEntity<List<Expense>> getApprovedExpenses() {
-        List<Expense> expenses = expenseService.getExpensesByStatus(ApprovalStatus.APPROVED);
-        return ResponseEntity.ok(expenses);
+        return getReimbursementQueue();
     }
 }

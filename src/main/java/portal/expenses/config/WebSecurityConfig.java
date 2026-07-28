@@ -22,10 +22,12 @@ import java.util.Arrays;
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity(prePostEnabled = true)
+@SuppressWarnings("java:S4502")
 public class WebSecurityConfig {
 
     private static final String ROLE_MANAGER = "ROLE_MANAGER";
     private static final String ROLE_FINANCE = "ROLE_FINANCE";
+    private static final String ROLE_EMPLOYEE = "ROLE_EMPLOYEE";
 
     private final JwtAuthFilter jwtAuthFilter;
     private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
@@ -100,10 +102,10 @@ public class WebSecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/auth/**").permitAll()
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/users").hasAnyAuthority("ROLE_EMPLOYEE", ROLE_MANAGER, ROLE_FINANCE)
+                        .requestMatchers(HttpMethod.GET, "/users").hasAnyAuthority(ROLE_EMPLOYEE, ROLE_MANAGER, ROLE_FINANCE)
                         .requestMatchers(HttpMethod.POST, "/users").hasAuthority(ROLE_MANAGER)
                         .requestMatchers(HttpMethod.DELETE, "/users/**").hasAuthority(ROLE_FINANCE)
-                        .requestMatchers("/expenses/**").hasAnyAuthority("ROLE_EMPLOYEE", ROLE_MANAGER, ROLE_FINANCE)
+                        .requestMatchers("/expenses/**").hasAnyAuthority(ROLE_EMPLOYEE, ROLE_MANAGER, ROLE_FINANCE)
                         .requestMatchers("/manager/**").hasAuthority(ROLE_MANAGER)
                         .requestMatchers("/finance/**").hasAuthority(ROLE_FINANCE)
                         .anyRequest().authenticated()

@@ -11,13 +11,15 @@ public class PasswordEncoderUtil {
     public static void main(String[] args) {
         BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
 
-        // --- Generate hashes for your initial users ---
-        String employeePassword = "password-employee";
-        String managerPassword = "password-manager";
-        String financePassword = "password-finance";
+        // --- Generate hashes dynamically for initial users ---
+        String employeePassword = args.length > 0 ? args[0] : java.util.UUID.randomUUID().toString();
+        String managerPassword = args.length > 1 ? args[1] : java.util.UUID.randomUUID().toString();
+        String financePassword = args.length > 2 ? args[2] : java.util.UUID.randomUUID().toString();
 
-        logger.info("Employee Password ('{}'): {}", employeePassword, encoder.encode(employeePassword));
-        logger.info("Manager Password ('{}'): {}", managerPassword, encoder.encode(managerPassword));
-        logger.info("Finance Password ('{}'): {}", financePassword, encoder.encode(financePassword));
+        if (logger.isInfoEnabled()) {
+            logger.info("Employee Password ('{}'): {}", employeePassword, encoder.encode(employeePassword));
+            logger.info("Manager Password ('{}'): {}", managerPassword, encoder.encode(managerPassword));
+            logger.info("Finance Password ('{}'): {}", financePassword, encoder.encode(financePassword));
+        }
     }
 }
