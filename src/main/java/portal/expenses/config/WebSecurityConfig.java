@@ -67,6 +67,10 @@ public class WebSecurityConfig {
                 "http://localhost:3000"));
 
         // Explicitly allow methods used by your Angular app
+        configuration.setAllowedOrigins(Arrays.asList("https://du46cvjytrhz9.cloudfront.net","http://localhost:4200",
+                "http://localhost:3000"));
+
+        // Explicitly allow methods used by your Angular app
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH", "HEAD"));
 
         // Allow all headers - this is important for CORS preflight

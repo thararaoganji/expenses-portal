@@ -30,7 +30,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/expenses")
@@ -157,7 +156,7 @@ public class ExpenseController {
         response.setExpense(expense);
         response.setApprovals(approvals.stream()
                 .map(this::mapToResponse)
-                .collect(Collectors.toList()));
+                .toList());
 
         return ResponseEntity.ok(response);
     }
@@ -251,7 +250,7 @@ public class ExpenseController {
         List<ExpenseApproval> approvals = approvalService.getApprovalHistory(expenseId);
         List<ExpenseApprovalResponse> responses = approvals.stream()
                 .map(this::mapToResponse)
-                .collect(Collectors.toList());
+                .toList();
         return ResponseEntity.ok(responses);
     }
 
@@ -265,7 +264,7 @@ public class ExpenseController {
 
         List<AuditLogResponse> response = auditLog.stream()
                 .map(this::mapToAuditResponse)
-                .collect(Collectors.toList());
+                .toList();
 
         return ResponseEntity.ok(response);
     }
