@@ -27,6 +27,7 @@ public interface ExpenseRepository extends JpaRepository<Expense, Long>, JpaSpec
     Page<Expense> findByUser(AppUser user, Pageable pageable);
     Page<Expense> findByApprovalStatus(ApprovalStatus status, Pageable pageable);
 
+    @SuppressWarnings("java:S107")
     @Query("SELECT e FROM Expense e WHERE " +
            "(:userId IS NULL OR e.user.id = :userId) AND " +
            "(:status IS NULL OR e.approvalStatus = :status) AND " +

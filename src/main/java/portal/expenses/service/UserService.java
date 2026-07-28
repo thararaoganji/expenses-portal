@@ -2,7 +2,6 @@ package portal.expenses.service;
 
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -35,7 +34,7 @@ public class UserService {
     public List<UserResponseDto> getAllUsers() {
         return userRepository.findAll().stream()
                 .map(this::toUserResponseDto)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     public UserResponseDto createUser(UserCreateRequest request) {
@@ -55,7 +54,7 @@ public class UserService {
     }
 
     private UserResponseDto toUserResponseDto(AppUser user) {
-        Set<String> roleNames = user.getRoles().stream().map(Role::getName).collect(Collectors.toSet());
+        Set<String> roleNames = user.getRoles().stream().map(Role::getName).collect(java.util.stream.Collectors.toSet());
         return new UserResponseDto(user.getId(), user.getUsername(), user.getName(), user.getEmail(), roleNames);
     }
 
