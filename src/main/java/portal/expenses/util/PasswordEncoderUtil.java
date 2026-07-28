@@ -11,13 +11,15 @@ public class PasswordEncoderUtil {
     public static void main(String[] args) {
         BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
 
-        // --- Generate hashes for your initial users ---
-        String employeePassword = "password-employee";
-        String managerPassword = "password-manager";
-        String financePassword = "password-finance";
+        // Environment or default password placeholders
+        String employeePassword = System.getenv().getOrDefault("INIT_EMP_PASS", "changeit-employee");
+        String managerPassword = System.getenv().getOrDefault("INIT_MGR_PASS", "changeit-manager");
+        String financePassword = System.getenv().getOrDefault("INIT_FIN_PASS", "changeit-finance");
 
-        logger.info("Employee Password ('{}'): {}", employeePassword, encoder.encode(employeePassword));
-        logger.info("Manager Password ('{}'): {}", managerPassword, encoder.encode(managerPassword));
-        logger.info("Finance Password ('{}'): {}", financePassword, encoder.encode(financePassword));
+        if (logger.isInfoEnabled()) {
+            logger.info("Employee Password hash: {}", encoder.encode(employeePassword));
+            logger.info("Manager Password hash: {}", encoder.encode(managerPassword));
+            logger.info("Finance Password hash: {}", encoder.encode(financePassword));
+        }
     }
 }
