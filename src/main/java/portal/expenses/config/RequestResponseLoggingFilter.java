@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 @Component
 public class RequestResponseLoggingFilter extends OncePerRequestFilter {
 
-    private static final Logger logger = LoggerFactory.getLogger(RequestResponseLoggingFilter.class);
+    private static final Logger log = LoggerFactory.getLogger(RequestResponseLoggingFilter.class);
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
@@ -54,39 +54,43 @@ public class RequestResponseLoggingFilter extends OncePerRequestFilter {
                 .map(headerName -> headerName + ": " + request.getHeader(headerName))
                 .collect(Collectors.joining(", "));
 
-        logger.info("==> Incoming Request: {} {} {}",
+        log.info("==> Incoming Request: {} {} {}",
                    method,
                    uri,
                    queryString != null ? "?" + queryString : "");
-        logger.debug("Request Headers: {}", headers);
+        if (log.isDebugEnabled()) {
+            log.debug("Request Headers: {}", headers);
+        }
 
         // Log request body for non-multipart requests
         String contentType = request.getContentType();
         if (contentType != null && !contentType.contains("multipart/form-data")) {
             byte[] content = request.getContentAsByteArray();
-            if (content.length > 0) {
+            if (content.length > 0 && log.isDebugEnabled()) {
                 String body = new String(content, StandardCharsets.UTF_8);
-                logger.debug("Request Body: {}", body);
+                log.debug("Request Body: {}", body);
             }
         } else if (contentType != null && contentType.contains("multipart/form-data")) {
-            logger.debug("Request Body: [multipart/form-data - not logged]");
+            if (log.isDebugEnabled()) {
+                log.debug("Request Body: [multipart/form-data - not logged]");
+            }
         }
     }
 
     private void logResponse(ContentCachingResponseWrapper response, long duration) {
         int status = response.getStatus();
 
-        logger.info("<== Response: {} ({}ms)", status, duration);
+        log.info("<== Response: {} ({}ms)", status, duration);
 
         // Log response body
         byte[] content = response.getContentAsByteArray();
-        if (content.length > 0) {
+        if (content.length > 0 && log.isDebugEnabled()) {
             String body = new String(content, StandardCharsets.UTF_8);
             // Limit response body logging to 1000 characters
             if (body.length() > 1000) {
-                logger.debug("Response Body: {}... [truncated]", body.substring(0, 1000));
+                log.debug("Response Body: {}... [truncated]", body.substring(0, 1000));
             } else {
-                logger.debug("Response Body: {}", body);
+                log.debug("Response Body: {}", body);
             }
         }
     }

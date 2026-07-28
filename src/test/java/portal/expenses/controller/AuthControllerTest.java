@@ -47,7 +47,7 @@ class AuthControllerTest {
     @MockBean
     private UserDetailsServiceImpl userDetailsService;
 
-    //@Test
+    @org.junit.jupiter.api.Test
     void login_shouldReturnToken_whenCredentialsAreValid() throws Exception {
         // Arrange
         LoginRequest loginRequest = new LoginRequest("user", "password");
@@ -65,7 +65,7 @@ class AuthControllerTest {
                 .andExpect(jsonPath("$.token").value("mock-jwt-token"));
     }
 
-    //@Test
+    @org.junit.jupiter.api.Test
     void login_shouldReturnUnauthorized_whenCredentialsAreInvalid() throws Exception {
         // Arrange
         LoginRequest loginRequest = new LoginRequest("user", "wrong-password");

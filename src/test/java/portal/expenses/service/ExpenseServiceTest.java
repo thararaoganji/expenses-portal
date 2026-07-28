@@ -155,16 +155,18 @@ class ExpenseServiceTest {
     void testCreateExpense_UserNotFound_ThrowsException() {
         // Arrange
         when(userRepository.findByUsername("unknown.user")).thenReturn(Optional.empty());
+        BigDecimal amount = new BigDecimal("100.00");
+        LocalDate date = LocalDate.now();
 
         // Act & Assert
         assertThrows(UsernameNotFoundException.class, () -> {
             expenseService.createExpense(
                 "Test",
-                new BigDecimal("100.00"),
+                amount,
                 null,
                 "unknown.user",
                 ExpenseCategory.OTHER,
-                LocalDate.now()
+                date
             );
         });
 
@@ -202,7 +204,7 @@ class ExpenseServiceTest {
         when(expenseRepository.findById(1L)).thenReturn(Optional.of(testExpense));
 
         // Act & Assert
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
             expenseService.submitExpense(1L, "different.user");
         });
 
@@ -250,7 +252,7 @@ class ExpenseServiceTest {
         when(expenseRepository.findById(999L)).thenReturn(Optional.empty());
 
         // Act & Assert
-        assertThrows(RuntimeException.class, () -> {
+        assertThrows(java.util.NoSuchElementException.class, () -> {
             expenseService.getExpenseById(999L);
         });
     }

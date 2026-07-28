@@ -16,6 +16,18 @@ import java.time.LocalDate;
 import java.util.List;
 
 public interface ExpenseRepository extends JpaRepository<Expense, Long>, JpaSpecificationExecutor<Expense> {
+
+    record Filter(
+        Long userId,
+        ApprovalStatus status,
+        ExpenseCategory category,
+        BigDecimal minAmount,
+        BigDecimal maxAmount,
+        LocalDate startDate,
+        LocalDate endDate,
+        Boolean hasReceipt
+    ) {}
+
     // Existing methods
     List<Expense> findByUserId(Long userId);
     List<Expense> findByUser(AppUser user);
@@ -28,23 +40,16 @@ public interface ExpenseRepository extends JpaRepository<Expense, Long>, JpaSpec
     Page<Expense> findByApprovalStatus(ApprovalStatus status, Pageable pageable);
 
     @Query("SELECT e FROM Expense e WHERE " +
-           "(:userId IS NULL OR e.user.id = :userId) AND " +
-           "(:status IS NULL OR e.approvalStatus = :status) AND " +
-           "(:category IS NULL OR e.category = :category) AND " +
-           "(:minAmount IS NULL OR e.amount >= :minAmount) AND " +
-           "(:maxAmount IS NULL OR e.amount <= :maxAmount) AND " +
-           "(:startDate IS NULL OR e.expenseDate >= :startDate) AND " +
-           "(:endDate IS NULL OR e.expenseDate <= :endDate) AND " +
-           "(:hasReceipt IS NULL OR e.hasReceipt = :hasReceipt)")
+           "(:#{#filter.userId} IS NULL OR e.user.id = :#{#filter.userId}) AND " +
+           "(:#{#filter.status} IS NULL OR e.approvalStatus = :#{#filter.status}) AND " +
+           "(:#{#filter.category} IS NULL OR e.category = :#{#filter.category}) AND " +
+           "(:#{#filter.minAmount} IS NULL OR e.amount >= :#{#filter.minAmount}) AND " +
+           "(:#{#filter.maxAmount} IS NULL OR e.amount <= :#{#filter.maxAmount}) AND " +
+           "(:#{#filter.startDate} IS NULL OR e.expenseDate >= :#{#filter.startDate}) AND " +
+           "(:#{#filter.endDate} IS NULL OR e.expenseDate <= :#{#filter.endDate}) AND " +
+           "(:#{#filter.hasReceipt} IS NULL OR e.hasReceipt = :#{#filter.hasReceipt})")
     Page<Expense> findByFilters(
-            @Param("userId") Long userId,
-            @Param("status") ApprovalStatus status,
-            @Param("category") ExpenseCategory category,
-            @Param("minAmount") BigDecimal minAmount,
-            @Param("maxAmount") BigDecimal maxAmount,
-            @Param("startDate") LocalDate startDate,
-            @Param("endDate") LocalDate endDate,
-            @Param("hasReceipt") Boolean hasReceipt,
+            @Param("filter") Filter filter,
             Pageable pageable
     );
 }

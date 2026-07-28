@@ -1,4 +1,4 @@
 package portal.expenses.dto;
 
-public class RegisterRequest {
+public record RegisterRequest() {
 }
