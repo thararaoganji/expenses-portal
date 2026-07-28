@@ -5,6 +5,8 @@ import portal.expenses.entity.ApprovalStatus;
 import portal.expenses.entity.Expense;
 import portal.expenses.service.ExpenseService;
 import portal.expenses.service.FinanceService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
@@ -20,6 +22,8 @@ import java.util.List;
 @PreAuthorize("hasAuthority('ROLE_FINANCE')")
 public class FinanceController {
 
+    private static final Logger logger = LoggerFactory.getLogger(FinanceController.class);
+
     private final ExpenseService expenseService;
     private final FinanceService financeService;
 
@@ -33,6 +37,7 @@ public class FinanceController {
      */
     @GetMapping("/reimbursement-queue")
     public ResponseEntity<List<Expense>> getReimbursementQueue() {
+        logger.debug("Fetching reimbursement queue");
         List<Expense> expenses = expenseService.getExpensesByStatus(ApprovalStatus.APPROVED);
         return ResponseEntity.ok(expenses);
     }
@@ -105,7 +110,8 @@ public class FinanceController {
      */
     @GetMapping("/approved")
     public ResponseEntity<List<Expense>> getApprovedExpenses() {
+        logger.debug("Fetching approved expenses for finance");
         List<Expense> expenses = expenseService.getExpensesByStatus(ApprovalStatus.APPROVED);
-        return ResponseEntity.ok(expenses);
+        return ResponseEntity.ok().body(expenses);
     }
 }
