@@ -7,6 +7,8 @@ import portal.expenses.entity.Expense;
 import portal.expenses.service.ApprovalService;
 import portal.expenses.service.ExpenseService;
 import jakarta.validation.Valid;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -18,6 +20,8 @@ import java.util.List;
 @RequestMapping("/manager")
 @PreAuthorize("hasAuthority('ROLE_MANAGER')")
 public class ManagerController {
+
+    private static final Logger logger = LoggerFactory.getLogger(ManagerController.class);
 
     private final ExpenseService expenseService;
     private final ApprovalService approvalService;
@@ -32,8 +36,8 @@ public class ManagerController {
      */
     @GetMapping("/approval-queue")
     public ResponseEntity<List<Expense>> getApprovalQueue() {
-        System.out.println("/approval-queue");
-        System.out.println("Fetching approval queue...");
+        logger.debug("/approval-queue");
+        logger.debug("Fetching approval queue...");
         List<Expense> expenses = expenseService.getExpensesByStatus(ApprovalStatus.MANAGER_REVIEW);
         return ResponseEntity.ok(expenses);
     }
