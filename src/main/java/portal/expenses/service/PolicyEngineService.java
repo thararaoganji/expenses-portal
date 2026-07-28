@@ -89,22 +89,16 @@ public class PolicyEngineService {
      * Evaluates a single policy rule against an expense.
      */
     private boolean evaluateRule(PolicyRule rule, Expense expense) {
-        switch (rule.getRuleType()) {
-            case AMOUNT_THRESHOLD:
-            case AUTO_APPROVE:
-            case MANAGER_APPROVAL:
-            case FINANCE_APPROVAL:
-                return evaluateAmountThreshold(rule, expense);
-            case CATEGORY_RULE:
-                return evaluateCategoryRule(rule, expense);
-            case AGE_LIMIT:
-                return evaluateAgeLimit(rule, expense);
-            case RECEIPT_REQUIRED:
-                return evaluateReceiptRequired(rule, expense);
-            default:
-                logger.warn("Unknown rule type: {}", rule.getRuleType());
-                return false;
-        }
+        return switch (rule.getRuleType()) {
+            case AMOUNT_THRESHOLD, AUTO_APPROVE, MANAGER_APPROVAL, FINANCE_APPROVAL -> evaluateAmountThreshold(rule, expense);
+            case CATEGORY_RULE -> evaluateCategoryRule(rule, expense);
+            case AGE_LIMIT -> evaluateAgeLimit(rule, expense);
+            case RECEIPT_REQUIRED -> evaluateReceiptRequired(rule, expense);
+            case null, default -> {
+                logger.warn("Unknown rule type: {}", rule != null ? rule.getRuleType() : null);
+                yield false;
+            }
+        };
     }
 
     /**

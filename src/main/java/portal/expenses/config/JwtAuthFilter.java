@@ -21,7 +21,7 @@ import java.io.IOException;
 @Component
 public class JwtAuthFilter extends OncePerRequestFilter {
 
-    private static final Logger logger = LoggerFactory.getLogger(JwtAuthFilter.class);
+    private static final Logger LOG = LoggerFactory.getLogger(JwtAuthFilter.class);
 
     private final JwtUtil jwtUtil;
     private final UserDetailsService userDetailsService;
@@ -43,7 +43,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
         // If there's no Bearer token in the header, pass the request to the next filter
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            logger.debug("No JWT token found in request to: {}", requestPath);
+            LOG.debug("No JWT token found in request to: {}", requestPath);
             filterChain.doFilter(request, response);
             return;
         }
@@ -52,10 +52,10 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         jwt = authHeader.substring(7);
         try {
             username = jwtUtil.extractUsername(jwt);
-            logger.debug("JWT token found for user: {} accessing: {}", username, requestPath);
+            LOG.debug("JWT token found for user: {} accessing: {}", username, requestPath);
         } catch (JwtException e) {
             // If the token is invalid (e.g., expired, malformed), send a 403 response.
-            logger.warn("Invalid or expired JWT token for request to: {} - Error: {}", requestPath, e.getMessage());
+            LOG.warn("Invalid or expired JWT token for request to: {} - Error: {}", requestPath, e.getMessage());
             response.setStatus(HttpServletResponse.SC_FORBIDDEN);
             response.setContentType("application/json");
             response.getWriter().write("{\"error\": \"Invalid or expired JWT token\", \"message\": \"" + e.getMessage() + "\"}");
@@ -73,12 +73,12 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                                     userDetails, null, userDetails.getAuthorities());
                     authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                     SecurityContextHolder.getContext().setAuthentication(authToken);
-                    logger.debug("Authentication successful for user: {} with roles: {}", username, userDetails.getAuthorities());
+                    LOG.debug("Authentication successful for user: {} with roles: {}", username, userDetails.getAuthorities());
                 } else {
-                    logger.warn("JWT token validation failed for user: {}", username);
+                    LOG.warn("JWT token validation failed for user: {}", username);
                 }
             } catch (Exception e) {
-                logger.error("Error during authentication for user: {} - Error: {}", username, e.getMessage());
+                LOG.error("Error during authentication for user: {} - Error: {}", username, e.getMessage());
             }
         }
 

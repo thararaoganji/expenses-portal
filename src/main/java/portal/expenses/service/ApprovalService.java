@@ -12,11 +12,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 
 @Service
 public class ApprovalService {
 
     private static final Logger logger = LoggerFactory.getLogger(ApprovalService.class);
+    private static final String EXPENSE_NOT_FOUND_PREFIX = "Expense not found with ID: ";
+    private static final String USER_NOT_FOUND_PREFIX = "User not found: ";
 
     private final ExpenseRepository expenseRepository;
     private final ExpenseApprovalRepository expenseApprovalRepository;
@@ -39,10 +42,10 @@ public class ApprovalService {
     @Transactional
     public Expense processApproval(Long expenseId, String username, ApprovalStatus newStatus, String comments) {
         Expense expense = expenseRepository.findById(expenseId)
-                .orElseThrow(() -> new RuntimeException("Expense not found with ID: " + expenseId));
+                .orElseThrow(() -> new NoSuchElementException(EXPENSE_NOT_FOUND_PREFIX + expenseId));
 
         AppUser approver = userRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("User not found: " + username));
+                .orElseThrow(() -> new NoSuchElementException(USER_NOT_FOUND_PREFIX + username));
 
         // Validate state transition
         validateApprovalTransition(expense, newStatus);
@@ -116,29 +119,25 @@ public class ApprovalService {
 
         // Define valid transitions
         switch (currentStatus) {
-            case PENDING:
+            case PENDING -> {
                 // Can transition to any status
-                break;
-            case MANAGER_REVIEW:
+            }
+            case MANAGER_REVIEW -> {
                 if (newStatus != ApprovalStatus.APPROVED && newStatus != ApprovalStatus.REJECTED
                     && newStatus != ApprovalStatus.FINANCE_REVIEW) {
                     throw new IllegalStateException(
                         "Invalid transition from MANAGER_REVIEW to " + newStatus);
                 }
-                break;
-            case FINANCE_REVIEW:
+            }
+            case FINANCE_REVIEW -> {
                 if (newStatus != ApprovalStatus.APPROVED && newStatus != ApprovalStatus.REJECTED) {
                     throw new IllegalStateException(
                         "Invalid transition from FINANCE_REVIEW to " + newStatus);
                 }
-                break;
-            case AUTO_APPROVED:
-            case APPROVED:
-            case REJECTED:
-                throw new IllegalStateException(
+            }
+            case AUTO_APPROVED, APPROVED, REJECTED -> throw new IllegalStateException(
                     "Cannot change status of expense in " + currentStatus + " state");
-            default:
-                throw new IllegalStateException("Unknown approval status: " + currentStatus);
+            case null, default -> throw new IllegalStateException("Unknown approval status: " + currentStatus);
         }
     }
 
@@ -146,14 +145,11 @@ public class ApprovalService {
      * Determine the approval level based on current status.
      */
     private String determineApprovalLevel(ApprovalStatus currentStatus) {
-        switch (currentStatus) {
-            case MANAGER_REVIEW:
-                return "MANAGER";
-            case FINANCE_REVIEW:
-                return "FINANCE";
-            default:
-                return "GENERAL";
-        }
+        return switch (currentStatus) {
+            case MANAGER_REVIEW -> "MANAGER";
+            case FINANCE_REVIEW -> "FINANCE";
+            case null, default -> "GENERAL";
+        };
     }
 
     /**
