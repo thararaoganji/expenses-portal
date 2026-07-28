@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.web.bind.annotation.*;
@@ -18,7 +19,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.NoSuchElementException;
 
 @RestController
 @RequestMapping("/auth")
@@ -58,13 +59,13 @@ public class AuthController {
 
         // Extract roles from authorities
         List<String> roles = userDetails.getAuthorities().stream()
-                .map(authority -> authority.getAuthority())
-                .collect(Collectors.toList());
+                .map(GrantedAuthority::getAuthority)
+                .toList();
 
         logger.info("User logged in successfully: {} with roles: {}", userDetails.getUsername(), roles);
         AppUser user = userRepository.findByUsername(userDetails.getUsername())
-                .orElseThrow(() -> new RuntimeException("User not found: " + userDetails.getUsername()));
-        return new LoginResponse(token, userDetails.getUsername(),user.getName(), roles);
+                .orElseThrow(() -> new NoSuchElementException("User not found: " + userDetails.getUsername()));
+        return new LoginResponse(token, userDetails.getUsername(), user.getName(), roles);
     }
 
     @GetMapping("/validate")
@@ -80,7 +81,10 @@ public class AuthController {
             }
 
             String token = authHeader.substring(7);
-            logger.info("Validating token: {}", token.substring(0, Math.min(token.length(), 30)) + "...");
+            if (logger.isInfoEnabled()) {
+                String sub = token.substring(0, Math.min(token.length(), 30));
+                logger.info("Validating token: {}...", sub);
+            }
 
             String username = jwtUtil.extractUsername(token);
             response.put("username", username);
@@ -91,8 +95,8 @@ public class AuthController {
 
             response.put(VALID_KEY, isValid);
             response.put("roles", userDetails.getAuthorities().stream()
-                    .map(a -> a.getAuthority())
-                    .collect(Collectors.toList()));
+                    .map(GrantedAuthority::getAuthority)
+                    .toList());
 
             if (isValid) {
                 logger.info("Token is VALID for user: {} with roles: {}", username, userDetails.getAuthorities());
@@ -109,10 +113,3 @@ public class AuthController {
         }
     }
 }
-
-// You will also need these DTOs (Data Transfer Objects)
-// src/main/java/com/expense/project/dto/LoginRequest.java
-// public record LoginRequest(String username, String password) {}
-
-// src/main/java/com/expense/project/dto/LoginResponse.java
-// public record LoginResponse(String token) {}
