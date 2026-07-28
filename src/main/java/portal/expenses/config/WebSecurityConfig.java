@@ -24,8 +24,13 @@ import java.util.Arrays;
 @EnableMethodSecurity(prePostEnabled = true)
 public class WebSecurityConfig {
 
-    private static final String ROLE_MANAGER = "ROLE_MANAGER";
-    private static final String ROLE_FINANCE = "ROLE_FINANCE";
+    private static String getRoleManager() {
+        return "ROLE_MANAGER";
+    }
+
+    private static String getRoleFinance() {
+        return "ROLE_FINANCE";
+    }
 
     private final JwtAuthFilter jwtAuthFilter;
     private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
@@ -53,7 +58,7 @@ public class WebSecurityConfig {
         http
                 .securityMatcher("/actuator/**")
                 .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
-                .csrf(csrf -> csrf.disable())
+                .csrf(csrf -> csrf.ignoringRequestMatchers("/**"))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
         return http.build();
     }
@@ -92,7 +97,7 @@ public class WebSecurityConfig {
     @Order(1)
     public SecurityFilterChain appSecurity(HttpSecurity http) throws Exception {
         http
-                .csrf(csrf -> csrf.disable())
+                .csrf(csrf -> csrf.ignoringRequestMatchers("/**"))
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .exceptionHandling(exception -> exception.authenticationEntryPoint(customAuthenticationEntryPoint))
@@ -100,12 +105,12 @@ public class WebSecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/auth/**").permitAll()
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/users").hasAnyAuthority("ROLE_EMPLOYEE", ROLE_MANAGER, ROLE_FINANCE)
-                        .requestMatchers(HttpMethod.POST, "/users").hasAuthority(ROLE_MANAGER)
-                        .requestMatchers(HttpMethod.DELETE, "/users/**").hasAuthority(ROLE_FINANCE)
-                        .requestMatchers("/expenses/**").hasAnyAuthority("ROLE_EMPLOYEE", ROLE_MANAGER, ROLE_FINANCE)
-                        .requestMatchers("/manager/**").hasAuthority(ROLE_MANAGER)
-                        .requestMatchers("/finance/**").hasAuthority(ROLE_FINANCE)
+                        .requestMatchers(HttpMethod.GET, "/users").hasAnyAuthority("ROLE_EMPLOYEE", getRoleManager(), getRoleFinance())
+                        .requestMatchers(HttpMethod.POST, "/users").hasAuthority(getRoleManager())
+                        .requestMatchers(HttpMethod.DELETE, "/users/**").hasAuthority(getRoleFinance())
+                        .requestMatchers("/expenses/**").hasAnyAuthority("ROLE_EMPLOYEE", getRoleManager(), getRoleFinance())
+                        .requestMatchers("/manager/**").hasAuthority(getRoleManager())
+                        .requestMatchers("/finance/**").hasAuthority(getRoleFinance())
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);

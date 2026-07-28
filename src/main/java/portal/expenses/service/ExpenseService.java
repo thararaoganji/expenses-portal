@@ -168,7 +168,7 @@ public class ExpenseService {
 
         // Verify ownership
         if (!expense.getUser().getUsername().equals(username)) {
-            throw new RuntimeException("User is not authorized to submit this expense");
+            throw new IllegalStateException("User is not authorized to submit this expense");
         }
 
         // Validate that expense is in DRAFT status (or PENDING for backward compatibility)
@@ -214,7 +214,7 @@ public class ExpenseService {
 
         // Verify ownership
         if (!expense.getUser().getUsername().equals(username)) {
-            throw new RuntimeException("User is not authorized to update this expense");
+            throw new IllegalStateException("User is not authorized to update this expense");
         }
 
         // Only allow updates on DRAFT expenses
@@ -370,13 +370,7 @@ public class ExpenseService {
         // Apply filters
         Page<Expense> page = expenseRepository.findByFilters(
                 user.getId(),
-                filter.getStatus(),
-                filter.getCategory(),
-                filter.getMinAmount(),
-                filter.getMaxAmount(),
-                filter.getStartDate(),
-                filter.getEndDate(),
-                filter.getHasReceipt(),
+                filter,
                 pageable
         );
 
@@ -399,13 +393,7 @@ public class ExpenseService {
         // Apply filters (without userId restriction)
         Page<Expense> page = expenseRepository.findByFilters(
                 null,  // No user restriction
-                filter.getStatus(),
-                filter.getCategory(),
-                filter.getMinAmount(),
-                filter.getMaxAmount(),
-                filter.getStartDate(),
-                filter.getEndDate(),
-                filter.getHasReceipt(),
+                filter,
                 pageable
         );
 

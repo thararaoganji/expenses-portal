@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.web.bind.annotation.*;
@@ -18,14 +19,16 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/auth")
 public class AuthController {
 
     private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
-    private static final String VALID_KEY = "valid";
+    
+    private static String getValidKey() {
+        return "valid";
+    }
 
     private final AuthenticationManager authenticationManager;
     private final JwtUtil jwtUtil;
@@ -58,8 +61,8 @@ public class AuthController {
 
         // Extract roles from authorities
         List<String> roles = userDetails.getAuthorities().stream()
-                .map(authority -> authority.getAuthority())
-                .collect(Collectors.toList());
+                .map(GrantedAuthority::getAuthority)
+                .toList();
 
         logger.info("User logged in successfully: {} with roles: {}", userDetails.getUsername(), roles);
         AppUser user = userRepository.findByUsername(userDetails.getUsername())
@@ -73,14 +76,16 @@ public class AuthController {
 
         try {
             if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-                response.put(VALID_KEY, false);
+                response.put(getValidKey(), false);
                 response.put("error", "Missing or invalid Authorization header");
                 logger.warn("Token validation failed: Missing or invalid header");
                 return ResponseEntity.badRequest().body(response);
             }
 
             String token = authHeader.substring(7);
-            logger.info("Validating token: {}", token.substring(0, Math.min(token.length(), 30)) + "...");
+            if (logger.isInfoEnabled()) {
+                logger.info("Validating token: {}...", token.substring(0, Math.min(token.length(), 30)));
+            }
 
             String username = jwtUtil.extractUsername(token);
             response.put("username", username);
@@ -89,10 +94,10 @@ public class AuthController {
             UserDetails userDetails = userDetailsService.loadUserByUsername(username);
             boolean isValid = jwtUtil.validateToken(token, userDetails);
 
-            response.put(VALID_KEY, isValid);
+            response.put(getValidKey(), isValid);
             response.put("roles", userDetails.getAuthorities().stream()
-                    .map(a -> a.getAuthority())
-                    .collect(Collectors.toList()));
+                    .map(GrantedAuthority::getAuthority)
+                    .toList());
 
             if (isValid) {
                 logger.info("Token is VALID for user: {} with roles: {}", username, userDetails.getAuthorities());
@@ -102,17 +107,10 @@ public class AuthController {
 
             return ResponseEntity.ok(response);
         } catch (Exception e) {
-            response.put(VALID_KEY, false);
+            response.put(getValidKey(), false);
             response.put("error", e.getMessage());
             logger.error("Token validation error: {}", e.getMessage(), e);
             return ResponseEntity.badRequest().body(response);
         }
     }
 }
-
-// You will also need these DTOs (Data Transfer Objects)
-// src/main/java/com/expense/project/dto/LoginRequest.java
-// public record LoginRequest(String username, String password) {}
-
-// src/main/java/com/expense/project/dto/LoginResponse.java
-// public record LoginResponse(String token) {}

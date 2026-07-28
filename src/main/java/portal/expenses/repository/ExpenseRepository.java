@@ -1,5 +1,6 @@
 package portal.expenses.repository;
 
+import portal.expenses.dto.ExpenseFilterRequest;
 import portal.expenses.entity.AppUser;
 import portal.expenses.entity.ApprovalStatus;
 import portal.expenses.entity.Expense;
@@ -11,7 +12,6 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -29,22 +29,16 @@ public interface ExpenseRepository extends JpaRepository<Expense, Long>, JpaSpec
 
     @Query("SELECT e FROM Expense e WHERE " +
            "(:userId IS NULL OR e.user.id = :userId) AND " +
-           "(:status IS NULL OR e.approvalStatus = :status) AND " +
-           "(:category IS NULL OR e.category = :category) AND " +
-           "(:minAmount IS NULL OR e.amount >= :minAmount) AND " +
-           "(:maxAmount IS NULL OR e.amount <= :maxAmount) AND " +
-           "(:startDate IS NULL OR e.expenseDate >= :startDate) AND " +
-           "(:endDate IS NULL OR e.expenseDate <= :endDate) AND " +
-           "(:hasReceipt IS NULL OR e.hasReceipt = :hasReceipt)")
+           "(:#{#filter.status} IS NULL OR e.approvalStatus = :#{#filter.status}) AND " +
+           "(:#{#filter.category} IS NULL OR e.category = :#{#filter.category}) AND " +
+           "(:#{#filter.minAmount} IS NULL OR e.amount >= :#{#filter.minAmount}) AND " +
+           "(:#{#filter.maxAmount} IS NULL OR e.amount <= :#{#filter.maxAmount}) AND " +
+           "(:#{#filter.startDate} IS NULL OR e.expenseDate >= :#{#filter.startDate}) AND " +
+           "(:#{#filter.endDate} IS NULL OR e.expenseDate <= :#{#filter.endDate}) AND " +
+           "(:#{#filter.hasReceipt} IS NULL OR e.hasReceipt = :#{#filter.hasReceipt})")
     Page<Expense> findByFilters(
             @Param("userId") Long userId,
-            @Param("status") ApprovalStatus status,
-            @Param("category") ExpenseCategory category,
-            @Param("minAmount") BigDecimal minAmount,
-            @Param("maxAmount") BigDecimal maxAmount,
-            @Param("startDate") LocalDate startDate,
-            @Param("endDate") LocalDate endDate,
-            @Param("hasReceipt") Boolean hasReceipt,
+            @Param("filter") ExpenseFilterRequest filter,
             Pageable pageable
     );
 }

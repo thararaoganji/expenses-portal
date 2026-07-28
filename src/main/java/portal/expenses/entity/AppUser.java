@@ -9,7 +9,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Entity
 @Table(name = "app_user")
@@ -31,7 +30,7 @@ public class AppUser implements UserDetails {
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "role_id")
     )
-    private transient Set<Role> roles = new HashSet<>();
+    private HashSet<Role> roles = new HashSet<>();
 
     // Getters and Setters...
 
@@ -39,7 +38,7 @@ public class AppUser implements UserDetails {
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return roles.stream()
                 .map(role -> new SimpleGrantedAuthority(role.getName()))
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Override
@@ -74,5 +73,7 @@ public class AppUser implements UserDetails {
     public String getEmail() { return email; }
     public void setEmail(String email) { this.email = email; }
     public Set<Role> getRoles() { return roles; }
-    public void setRoles(Set<Role> roles) { this.roles = roles; }
+    public void setRoles(Set<Role> roles) { 
+        this.roles = roles instanceof HashSet ? (HashSet<Role>) roles : new HashSet<>(roles); 
+    }
 }
