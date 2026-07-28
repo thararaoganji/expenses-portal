@@ -105,7 +105,7 @@ public class FinanceController {
      */
     @GetMapping("/approved")
     public ResponseEntity<List<Expense>> getApprovedExpenses() {
-        List<Expense> expenses = expenseService.getExpensesByStatus(ApprovalStatus.APPROVED);
+        List<Expense> expenses = expenseService.getExpensesByStatus(ApprovalStatus.FINANCE_REVIEW);
         return ResponseEntity.ok(expenses);
     }
 }

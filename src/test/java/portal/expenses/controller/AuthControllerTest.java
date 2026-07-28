@@ -5,6 +5,7 @@ import portal.expenses.config.ApplicationConfig;
 import portal.expenses.config.WebSecurityConfig;
 import portal.expenses.dto.LoginRequest;
 import portal.expenses.service.UserDetailsServiceImpl;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -47,7 +48,7 @@ class AuthControllerTest {
     @MockBean
     private UserDetailsServiceImpl userDetailsService;
 
-    //@Test
+    @Test
     void login_shouldReturnToken_whenCredentialsAreValid() throws Exception {
         // Arrange
         LoginRequest loginRequest = new LoginRequest("user", "password");
@@ -65,7 +66,7 @@ class AuthControllerTest {
                 .andExpect(jsonPath("$.token").value("mock-jwt-token"));
     }
 
-    //@Test
+    @Test
     void login_shouldReturnUnauthorized_whenCredentialsAreInvalid() throws Exception {
         // Arrange
         LoginRequest loginRequest = new LoginRequest("user", "wrong-password");
