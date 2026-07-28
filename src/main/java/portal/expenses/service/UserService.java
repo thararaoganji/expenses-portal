@@ -1,8 +1,8 @@
 package portal.expenses.service;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -35,7 +35,7 @@ public class UserService {
     public List<UserResponseDto> getAllUsers() {
         return userRepository.findAll().stream()
                 .map(this::toUserResponseDto)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     public UserResponseDto createUser(UserCreateRequest request) {
@@ -44,7 +44,7 @@ public class UserService {
         user.setPassword(passwordEncoder.encode(request.password()));
         user.setName(request.name());
         user.setEmail(request.email());
-        Role role = roleRepository.findByName(request.role()).orElseThrow(() -> new RuntimeException("Role not found"));
+        Role role = roleRepository.findByName(request.role()).orElseThrow(() -> new NoSuchElementException("Role not found"));
         user.setRoles(Set.of(role));
         AppUser savedUser = userRepository.save(user);
         return toUserResponseDto(savedUser);
@@ -55,7 +55,7 @@ public class UserService {
     }
 
     private UserResponseDto toUserResponseDto(AppUser user) {
-        Set<String> roleNames = user.getRoles().stream().map(Role::getName).collect(Collectors.toSet());
+        Set<String> roleNames = user.getRoles().stream().map(Role::getName).collect(java.util.stream.Collectors.toSet());
         return new UserResponseDto(user.getId(), user.getUsername(), user.getName(), user.getEmail(), roleNames);
     }
 
