@@ -39,10 +39,10 @@ public class ApprovalService {
     @Transactional
     public Expense processApproval(Long expenseId, String username, ApprovalStatus newStatus, String comments) {
         Expense expense = expenseRepository.findById(expenseId)
-                .orElseThrow(() -> new RuntimeException("Expense not found with ID: " + expenseId));
+                .orElseThrow(() -> new IllegalArgumentException("Expense not found with ID: " + expenseId));
 
         AppUser approver = userRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("User not found: " + username));
+                .orElseThrow(() -> new IllegalArgumentException("User not found: " + username));
 
         // Validate state transition
         validateApprovalTransition(expense, newStatus);
@@ -132,9 +132,7 @@ public class ApprovalService {
                         "Invalid transition from FINANCE_REVIEW to " + newStatus);
                 }
                 break;
-            case AUTO_APPROVED:
-            case APPROVED:
-            case REJECTED:
+            case AUTO_APPROVED, APPROVED, REJECTED:
                 throw new IllegalStateException(
                     "Cannot change status of expense in " + currentStatus + " state");
             default:
@@ -146,14 +144,11 @@ public class ApprovalService {
      * Determine the approval level based on current status.
      */
     private String determineApprovalLevel(ApprovalStatus currentStatus) {
-        switch (currentStatus) {
-            case MANAGER_REVIEW:
-                return "MANAGER";
-            case FINANCE_REVIEW:
-                return "FINANCE";
-            default:
-                return "GENERAL";
-        }
+        return switch (currentStatus) {
+            case MANAGER_REVIEW -> "MANAGER";
+            case FINANCE_REVIEW -> "FINANCE";
+            default -> "GENERAL";
+        };
     }
 
     /**
