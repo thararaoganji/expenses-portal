@@ -8,16 +8,26 @@ public class PasswordEncoderUtil {
 
     private static final Logger logger = LoggerFactory.getLogger(PasswordEncoderUtil.class);
 
+    private PasswordEncoderUtil() {
+        // Utility class private constructor
+    }
+
     public static void main(String[] args) {
         BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
 
-        // --- Generate hashes for your initial users ---
-        String employeePassword = "password-employee";
-        String managerPassword = "password-manager";
-        String financePassword = "password-finance";
+        if (args.length < 3) {
+            logger.info("Usage: PasswordEncoderUtil <empPwd> <mgrPwd> <finPwd>");
+            return;
+        }
 
-        logger.info("Employee Password ('{}'): {}", employeePassword, encoder.encode(employeePassword));
-        logger.info("Manager Password ('{}'): {}", managerPassword, encoder.encode(managerPassword));
-        logger.info("Finance Password ('{}'): {}", financePassword, encoder.encode(financePassword));
+        String employeeHash = encoder.encode(args[0]);
+        String managerHash = encoder.encode(args[1]);
+        String financeHash = encoder.encode(args[2]);
+
+        if (logger.isInfoEnabled()) {
+            logger.info("Employee Password Hash: {}", employeeHash);
+            logger.info("Manager Password Hash: {}", managerHash);
+            logger.info("Finance Password Hash: {}", financeHash);
+        }
     }
 }

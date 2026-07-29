@@ -89,22 +89,19 @@ public class PolicyEngineService {
      * Evaluates a single policy rule against an expense.
      */
     private boolean evaluateRule(PolicyRule rule, Expense expense) {
-        switch (rule.getRuleType()) {
-            case AMOUNT_THRESHOLD:
-            case AUTO_APPROVE:
-            case MANAGER_APPROVAL:
-            case FINANCE_APPROVAL:
-                return evaluateAmountThreshold(rule, expense);
-            case CATEGORY_RULE:
-                return evaluateCategoryRule(rule, expense);
-            case AGE_LIMIT:
-                return evaluateAgeLimit(rule, expense);
-            case RECEIPT_REQUIRED:
-                return evaluateReceiptRequired(rule, expense);
-            default:
-                logger.warn("Unknown rule type: {}", rule.getRuleType());
-                return false;
+        if (rule == null || rule.getRuleType() == null) {
+            return false;
         }
+        return switch (rule.getRuleType()) {
+            case AMOUNT_THRESHOLD, AUTO_APPROVE, MANAGER_APPROVAL, FINANCE_APPROVAL -> evaluateAmountThreshold(rule, expense);
+            case CATEGORY_RULE -> evaluateCategoryRule(rule, expense);
+            case AGE_LIMIT -> evaluateAgeLimit(rule, expense);
+            case RECEIPT_REQUIRED -> evaluateReceiptRequired(rule, expense);
+            default -> {
+                logger.warn("Unknown rule type: {}", rule.getRuleType());
+                yield false;
+            }
+        };
     }
 
     /**
@@ -167,21 +164,20 @@ public class PolicyEngineService {
      * Creates approval records based on the final status.
      */
     private void createApprovalRecordsForStatus(Expense expense, PolicyRule rule, ApprovalStatus status) {
+        if (status == null) {
+            return;
+        }
         switch (status) {
-            case AUTO_APPROVED:
-                createApprovalRecord(expense, rule, ApprovalStatus.AUTO_APPROVED, "AUTO");
-                break;
-            case MANAGER_REVIEW:
-                createApprovalRecord(expense, rule, ApprovalStatus.MANAGER_REVIEW, "MANAGER");
-                break;
-            case FINANCE_REVIEW:
+            case AUTO_APPROVED -> createApprovalRecord(expense, rule, ApprovalStatus.AUTO_APPROVED, "AUTO");
+            case MANAGER_REVIEW -> createApprovalRecord(expense, rule, ApprovalStatus.MANAGER_REVIEW, "MANAGER");
+            case FINANCE_REVIEW -> {
                 // Requires both manager and finance review
                 createApprovalRecord(expense, rule, ApprovalStatus.MANAGER_REVIEW, "MANAGER");
                 createApprovalRecord(expense, rule, ApprovalStatus.FINANCE_REVIEW, "FINANCE");
-                break;
-            default:
+            }
+            default -> {
                 // PENDING or other statuses don't create approval records yet
-                break;
+            }
         }
     }
 
