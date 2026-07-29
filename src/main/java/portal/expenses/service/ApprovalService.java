@@ -1,6 +1,5 @@
 package portal.expenses.service;
 
-
 import portal.expenses.repository.AuditEntryRepository;
 import portal.expenses.repository.ExpenseApprovalRepository;
 import portal.expenses.repository.ExpenseRepository;
@@ -12,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 
 @Service
 public class ApprovalService {
@@ -39,10 +39,10 @@ public class ApprovalService {
     @Transactional
     public Expense processApproval(Long expenseId, String username, ApprovalStatus newStatus, String comments) {
         Expense expense = expenseRepository.findById(expenseId)
-                .orElseThrow(() -> new RuntimeException("Expense not found with ID: " + expenseId));
+                .orElseThrow(() -> new NoSuchElementException("Expense not found with ID: " + expenseId));
 
         AppUser approver = userRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("User not found: " + username));
+                .orElseThrow(() -> new NoSuchElementException("User not found: " + username));
 
         // Validate state transition
         validateApprovalTransition(expense, newStatus);
@@ -132,9 +132,7 @@ public class ApprovalService {
                         "Invalid transition from FINANCE_REVIEW to " + newStatus);
                 }
                 break;
-            case AUTO_APPROVED:
-            case APPROVED:
-            case REJECTED:
+            case AUTO_APPROVED, APPROVED, REJECTED:
                 throw new IllegalStateException(
                     "Cannot change status of expense in " + currentStatus + " state");
             default:

@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -43,6 +44,12 @@ public class GlobalExceptionHandler {
         return buildErrorResponse(ex, HttpStatus.NOT_FOUND, request);
     }
 
+    @ExceptionHandler(BadCredentialsException.class)
+    public ResponseEntity<ErrorResponse> handleBadCredentialsException(BadCredentialsException ex, WebRequest request) {
+        logger.warn("Bad credentials: {}", ex.getMessage());
+        return buildErrorResponse(ex, HttpStatus.UNAUTHORIZED, request);
+    }
+
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ErrorResponse> handleBadRequestException(IllegalArgumentException ex, WebRequest request) {
         logger.warn("Bad request: {}", ex.getMessage());
@@ -59,12 +66,14 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ValidationErrorResponse> handleValidationExceptions(MethodArgumentNotValidException ex, WebRequest request) {
         Map<String, String> errors = new HashMap<>();
-        ex.getBindingResult().getFieldErrors().forEach(error -> {
-            errors.put(error.getField(), error.getDefaultMessage());
-        });
+        ex.getBindingResult().getFieldErrors().forEach(error ->
+            errors.put(error.getField(), error.getDefaultMessage())
+        );
 
         logger.warn("Validation failed: {} error(s) at {}", errors.size(), getRequestPath(request));
-        logger.debug("Validation errors: {}", errors);
+        if (logger.isDebugEnabled()) {
+            logger.debug("Validation errors: {}", errors);
+        }
 
         ValidationErrorResponse errorResponse = new ValidationErrorResponse(
                 LocalDateTime.now(),
